@@ -107,13 +107,25 @@ public class WrapperDataSource extends JBossWrapper implements Referenceable, Da
       {
          WrappedConnection wc = (WrappedConnection) cm.allocateConnection(mcf, null);
          wc.setDataSource(this);
-         return wc;
+         Connection sqlConnection = null;
+         try
+         {
+            sqlConnection = JBossProxy.getProxyOrWrapper(wc.getWrappedObject(), wc, Connection.class);
+         }
+         catch (Exception e)
+         {
+            // FIXME
+            e.printStackTrace();
+            throw new ResourceException(e);
+         }
+         return sqlConnection;
       }
       catch (ResourceException re)
       {
          throw new SQLException(re);
       }
    }
+
 
    /**
     * {@inheritDoc}

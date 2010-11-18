@@ -147,9 +147,9 @@ public abstract class BaseWrapperManagedConnection implements ManagedConnection
     */
    public BaseWrapperManagedConnection(final BaseWrapperManagedConnectionFactory mcf,
                                        final Connection con,
-                                       final Properties props, 
-                                       final int transactionIsolation, 
-                                       final int psCacheSize) 
+                                       final Properties props,
+                                       final int transactionIsolation,
+                                       final int psCacheSize)
       throws SQLException
    {
       this.mcf = mcf;
@@ -324,7 +324,7 @@ public abstract class BaseWrapperManagedConnection implements ManagedConnection
          throw new SQLException("Interrupted attempting lock: " + this);
       }
    }
-   
+
    /**
     * Unlock
     */
@@ -344,6 +344,7 @@ public abstract class BaseWrapperManagedConnection implements ManagedConnection
    {
       checkIdentity(subject, cri);
       WrappedConnection lc = WRAPPED_CONNECTION_FACTORY.createWrappedConnection(this);
+
       synchronized (handles)
       {
          handles.add(lc);
@@ -457,7 +458,7 @@ public abstract class BaseWrapperManagedConnection implements ManagedConnection
          if (mcf.isStaleConnection((SQLException)t))
          {
             t = new StaleConnectionException((SQLException)t);
-         
+
          }
          else
          {
@@ -469,7 +470,7 @@ public abstract class BaseWrapperManagedConnection implements ManagedConnection
       }
       else
       {
-         broadcastConnectionError(t);         
+         broadcastConnectionError(t);
       }
 
       return t;
@@ -533,7 +534,6 @@ public abstract class BaseWrapperManagedConnection implements ManagedConnection
    {
       if (con == null)
          throw new SQLException("Connection has been destroyed!!!");
-
       return con;
    }
 
@@ -549,10 +549,10 @@ public abstract class BaseWrapperManagedConnection implements ManagedConnection
    {
       if (psCache != null)
       {
-         PreparedStatementCache.Key key = 
+         PreparedStatementCache.Key key =
             new PreparedStatementCache.Key(sql,
-                                           PreparedStatementCache.Key.PREPARED_STATEMENT, 
-                                           resultSetType, 
+                                           PreparedStatementCache.Key.PREPARED_STATEMENT,
+                                           resultSetType,
                                            resultSetConcurrency);
 
          CachedPreparedStatement cachedps = (CachedPreparedStatement) psCache.get(key);
@@ -607,10 +607,10 @@ public abstract class BaseWrapperManagedConnection implements ManagedConnection
    {
       if (psCache != null)
       {
-         PreparedStatementCache.Key key = 
-            new PreparedStatementCache.Key(sql, 
-                                           PreparedStatementCache.Key.CALLABLE_STATEMENT, 
-                                           resultSetType, 
+         PreparedStatementCache.Key key =
+            new PreparedStatementCache.Key(sql,
+                                           PreparedStatementCache.Key.CALLABLE_STATEMENT,
+                                           resultSetType,
                                            resultSetConcurrency);
 
          CachedCallableStatement cachedps = (CachedCallableStatement) psCache.get(key);
@@ -652,7 +652,7 @@ public abstract class BaseWrapperManagedConnection implements ManagedConnection
    {
       return con.prepareCall(sql, resultSetType, resultSetConcurrency);
    }
-   
+
    /**
     * Can the cached prepared statement be used
     * @param cachedps The statement
