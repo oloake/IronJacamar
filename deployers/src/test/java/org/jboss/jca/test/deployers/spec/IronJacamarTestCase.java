@@ -22,131 +22,64 @@
 
 package org.jboss.jca.test.deployers.spec;
 
-import org.jboss.jca.embedded.EmbeddedJCA;
-
-import java.io.File;
-import java.net.URL;
-
 import javax.naming.Context;
 import javax.naming.InitialContext;
-import javax.naming.NamingException;
 
-import org.jboss.logging.Logger;
+import org.jboss.shrinkwrap.api.spec.ResourceAdapterArchive;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
+
+import static org.hamcrest.core.IsNull.notNullValue;
+import static org.junit.Assert.assertThat;
 
 /**
  * Test cases for deploying resource adapter archives (.RAR) using ironjacamar.xml files
  * for activation
- * 
+ *
  * @author <a href="mailto:jesper.pedersen@jboss.org">Jesper Pedersen</a>
  * @version $Revision: $
  */
-public class IronJacamarTestCase
+public class IronJacamarTestCase extends AbstractDeployerTestCase
 {
 
    // --------------------------------------------------------------------------------||
    // Class Members ------------------------------------------------------------------||
    // --------------------------------------------------------------------------------||
 
-   private static Logger log = Logger.getLogger(IronJacamarTestCase.class);
-
    private static final String JNDI_PREFIX = "java:/eis/";
-
-   /*
-    * Embedded
-    */
-   private static EmbeddedJCA embedded;
-
-   // --------------------------------------------------------------------------------||
-   // Tests --------------------------------------------------------------------------||
-   // --------------------------------------------------------------------------------||
 
    /**
     * ra15outironjacamar.rar
-    * @throws Throwable throwable exception 
+    * @throws Throwable throwable exception
     */
    @Test
    public void testRa15out() throws Throwable
    {
-      URL archive = getURL("ra15outironjacamar.rar");
-      Context context = null;
- 
+      //given
+      String archiveName = "ra15outironjacamar.rar";
+      String packageName = "org.jboss.jca.test.deployers.spec.rars.ra10dtdout";
+      ResourceAdapterArchive raa = buidShrinkwrapRa(archiveName, packageName);
+      raa.addManifestResource(archiveName + "/META-INF/ra.xml", "ra.xml");
+      raa.addManifestResource(archiveName + "/META-INF/ironjacamar.xml", "ironjacamar.xml");
+
+      Context context = new InitialContext();;
+
       try
       {
-         embedded.deploy(archive);
+         //when
+         embedded.deploy(raa);
 
-         context = new InitialContext();
-         Object o = context.lookup(JNDI_PREFIX + "ra15outironjacamar-explicit");
-         assertNotNull(o);
-      }
-      catch (Throwable t)
-      {
-         log.error(t.getMessage(), t);
-         fail(t.getMessage());
+         //then
+         assertThat(context.lookup(JNDI_PREFIX + "ra15outironjacamar-explicit"), notNullValue());
+
       }
       finally
       {
-         if (context != null)
-         {
-            try
-            {
-               context.close();
-            }
-            catch (NamingException ne)
-            {
-               // Ignore
-            }
-         }
 
-         embedded.undeploy(archive);
+         context.close();
+
+         embedded.undeploy(raa);
       }
-   }
 
-   // --------------------------------------------------------------------------------||
-   // Lifecycle Methods --------------------------------------------------------------||
-   // --------------------------------------------------------------------------------||
-
-   /**
-    * Lifecycle start, before the suite is executed
-    * @throws Throwable throwable exception 
-    */
-   @BeforeClass
-   public static void beforeClass() throws Throwable
-   {
-      // Create and set an embedded JCA instance
-      embedded = new EmbeddedJCA();
-
-      // Startup
-      embedded.startup();
-   }
-
-   /**
-    * Lifecycle stop, after the suite is executed
-    * @throws Throwable throwable exception 
-    */
-   @AfterClass
-   public static void afterClass() throws Throwable
-   {
-      // Shutdown embedded
-      embedded.shutdown();
-
-      // Set embedded to null
-      embedded = null;
-   }
-
-   /**
-    * Get the URL for a test archive
-    * @param archive The name of the test archive
-    * @return The URL to the archive
-    * @throws Throwable throwable exception
-    */
-   public URL getURL(String archive) throws Throwable
-   {
-      File f = new File(System.getProperty("archives.dir") + File.separator + archive);
-      return f.toURI().toURL();
    }
 }

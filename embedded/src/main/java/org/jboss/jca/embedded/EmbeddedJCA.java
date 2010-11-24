@@ -46,7 +46,7 @@ import com.github.fungal.api.configuration.KernelConfiguration;
 public class EmbeddedJCA
 {
    /** Enable full profile */
-   private boolean fullProfile;
+   private final boolean fullProfile;
 
    /** Kernel */
    private Kernel kernel;
@@ -82,6 +82,15 @@ public class EmbeddedJCA
     */
    public void startup() throws Throwable
    {
+      startup(EmbeddedJCA.class.getClassLoader());
+   }
+
+   /**
+    * Startup
+    * @exception Throwable If an error occurs
+    */
+   public void startup(ClassLoader loader) throws Throwable
+   {
       List<String> order = new ArrayList<String>(3);
       order.add(".xml");
       order.add(".rar");
@@ -103,11 +112,11 @@ public class EmbeddedJCA
 
       if (fullProfile)
       {
-         deploy(EmbeddedJCA.class.getClassLoader(), "naming.xml");
-         deploy(EmbeddedJCA.class.getClassLoader(), "transaction.xml");
-         deploy(EmbeddedJCA.class.getClassLoader(), "stdio.xml");
-         deploy(EmbeddedJCA.class.getClassLoader(), "jca.xml");
-         deploy(EmbeddedJCA.class.getClassLoader(), "ds.xml");
+         deploy(loader, "naming.xml");
+         deploy(loader, "transaction.xml");
+         deploy(loader, "stdio.xml");
+         deploy(loader, "jca.xml");
+         deploy(loader, "ds.xml");
       }
    }
 
@@ -116,6 +125,15 @@ public class EmbeddedJCA
     * @exception Throwable If an error occurs
     */
    public void shutdown() throws Throwable
+   {
+      shutdown(EmbeddedJCA.class.getClassLoader());
+   }
+
+   /**
+    * Shutdown
+    * @exception Throwable If an error occurs
+    */
+   public void shutdown(ClassLoader loader) throws Throwable
    {
       if (shrinkwrapDeployments != null && shrinkwrapDeployments.size() > 0)
       {
@@ -128,11 +146,11 @@ public class EmbeddedJCA
 
       if (fullProfile)
       {
-         undeploy(EmbeddedJCA.class.getClassLoader(), "ds.xml");
-         undeploy(EmbeddedJCA.class.getClassLoader(), "jca.xml");
-         undeploy(EmbeddedJCA.class.getClassLoader(), "stdio.xml");
-         undeploy(EmbeddedJCA.class.getClassLoader(), "transaction.xml");
-         undeploy(EmbeddedJCA.class.getClassLoader(), "naming.xml");
+         undeploy(loader, "ds.xml");
+         undeploy(loader, "jca.xml");
+         undeploy(loader, "stdio.xml");
+         undeploy(loader, "transaction.xml");
+         undeploy(loader, "naming.xml");
       }
 
       kernel.shutdown();
@@ -164,7 +182,7 @@ public class EmbeddedJCA
    public void deploy(URL url) throws Throwable
    {
       if (url == null)
-         throw new IllegalArgumentException("Url is null");      
+         throw new IllegalArgumentException("Url is null");
 
       kernel.getMainDeployer().deploy(url);
    }
@@ -177,10 +195,10 @@ public class EmbeddedJCA
    public void deploy(ResourceAdapterArchive raa) throws Throwable
    {
       if (raa == null)
-         throw new IllegalArgumentException("Url is null");      
+         throw new IllegalArgumentException("Url is null");
 
       if (!raa.getName().endsWith(".rar"))
-         throw new IllegalArgumentException(raa.getName() + " doesn't end with .rar");      
+         throw new IllegalArgumentException(raa.getName() + " doesn't end with .rar");
 
       InputStream is = raa.as(ZipExporter.class).exportZip();
 
@@ -237,7 +255,7 @@ public class EmbeddedJCA
          shrinkwrapDeployments = new ArrayList<File>(1);
 
       shrinkwrapDeployments.add(raaFile);
-     
+
       kernel.getMainDeployer().deploy(raaFile.toURI().toURL());
    }
 
@@ -267,7 +285,7 @@ public class EmbeddedJCA
    public void deploy(Class<?> clz) throws Throwable
    {
       if (clz == null)
-         throw new IllegalArgumentException("Clz is null");      
+         throw new IllegalArgumentException("Clz is null");
 
       String name = clz.getName().replace('.', '/');
       name += "-jboss-beans.xml";
@@ -284,7 +302,7 @@ public class EmbeddedJCA
    public void undeploy(URL url) throws Throwable
    {
       if (url == null)
-         throw new IllegalArgumentException("Url is null");      
+         throw new IllegalArgumentException("Url is null");
 
       kernel.getMainDeployer().undeploy(url);
    }
@@ -297,7 +315,7 @@ public class EmbeddedJCA
    public void undeploy(ResourceAdapterArchive raa) throws Throwable
    {
       if (raa == null)
-         throw new IllegalArgumentException("Url is null");      
+         throw new IllegalArgumentException("Url is null");
 
       File parentDirectory = new File(SecurityActions.getSystemProperty("java.io.tmpdir"));
       File raaFile = new File(parentDirectory, raa.getName());
@@ -336,7 +354,7 @@ public class EmbeddedJCA
    public void undeploy(Class<?> clz) throws Throwable
    {
       if (clz == null)
-         throw new IllegalArgumentException("Clz is null");      
+         throw new IllegalArgumentException("Clz is null");
 
       String name = clz.getName().replace('.', '/');
       name += "-jboss-beans.xml";
@@ -353,7 +371,7 @@ public class EmbeddedJCA
    private void removeDeployment(File deployment) throws IOException
    {
       if (deployment == null)
-         throw new IllegalArgumentException("Deployment is null");      
+         throw new IllegalArgumentException("Deployment is null");
 
       if (deployment.exists())
       {
@@ -383,7 +401,7 @@ public class EmbeddedJCA
                if (files[i].isDirectory())
                {
                   recursiveDelete(files[i]);
-               } 
+               }
                else
                {
                   if (!files[i].delete())

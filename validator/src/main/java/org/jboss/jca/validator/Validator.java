@@ -34,9 +34,9 @@ import java.util.ResourceBundle;
  */
 public class Validator
 {
-   /** 
+   /**
     * The fully qualified class name of the rules
-    * as we may want to externalize them into a 
+    * as we may want to externalize them into a
     * properties file
     */
    private static final String[] CLASS_RULES = {
@@ -64,19 +64,21 @@ public class Validator
       "org.jboss.jca.validator.rules.ao.AOConfigProperties",
       "org.jboss.jca.validator.rules.ao.AORAA"
    };
-   
+
    private static final String[] OBJECT_RULES = {
       "org.jboss.jca.validator.rules.mc.MCGetMetaData",
    };
-   
+
    private static String[] allRules;
    static
    {
       List<String> arrayList = new ArrayList<String>();
       arrayList.addAll(Arrays.asList(CLASS_RULES));
-      arrayList.addAll(Arrays.asList(OBJECT_RULES)); 
+      arrayList.addAll(Arrays.asList(OBJECT_RULES));
       allRules = arrayList.toArray(new String[CLASS_RULES.length + OBJECT_RULES.length]);
    };
+
+   private static ResourceBundle resourceBoundle = null;
 
    /**
     * Constructor
@@ -85,13 +87,24 @@ public class Validator
    {
    }
 
+   public static void createDefaultResourceBundleWithCl(ClassLoader loader)
+   {
+      resourceBoundle = ResourceBundle.getBundle("validator", Locale.US, loader);
+   }
    /**
     * Get the resource bundle
     * @return The resource bundle
     */
    public ResourceBundle getResourceBundle()
    {
+      if (resourceBoundle != null)
+      {
+         return resourceBoundle;
+      }
+      else
+      {
       return ResourceBundle.getBundle("validator", Locale.US, Validator.class.getClassLoader());
+      }
    }
 
    /**
@@ -111,8 +124,8 @@ public class Validator
    }
 
    /**
-    * exec rules 
-    * @param objects to be validated 
+    * exec rules
+    * @param objects to be validated
     * @param rules used for validation
     * @return The list of failures; an Empty list if no errors
     */
