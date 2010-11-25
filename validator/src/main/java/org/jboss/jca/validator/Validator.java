@@ -87,7 +87,7 @@ public class Validator
    {
    }
 
-   public static void createDefaultResourceBundleWithCl(ClassLoader loader)
+   public static void createDefaultResourceBundleWithClassLoader(ClassLoader loader)
    {
       resourceBoundle = ResourceBundle.getBundle("validator", Locale.US, loader);
    }

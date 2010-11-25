@@ -58,7 +58,7 @@ public class IronJacamarTestCase extends AbstractDeployerTestCase
       //given
       String archiveName = "ra15outironjacamar.rar";
       String packageName = "org.jboss.jca.test.deployers.spec.rars.ra10dtdout";
-      ResourceAdapterArchive raa = buidShrinkwrapRa(archiveName, packageName);
+      ResourceAdapterArchive raa = buildShrinkWrapResourceAdapter(archiveName, packageName);
       raa.addManifestResource(archiveName + "/META-INF/ra.xml", "ra.xml");
       raa.addManifestResource(archiveName + "/META-INF/ironjacamar.xml", "ironjacamar.xml");
 

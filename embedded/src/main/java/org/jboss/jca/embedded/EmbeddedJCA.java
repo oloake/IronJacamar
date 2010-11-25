@@ -48,6 +48,8 @@ public class EmbeddedJCA
    /** Enable full profile */
    private final boolean fullProfile;
 
+   private final ClassLoader loader;
+
    /** Kernel */
    private Kernel kernel;
 
@@ -72,24 +74,30 @@ public class EmbeddedJCA
     */
    public EmbeddedJCA(boolean fullProfile)
    {
+      this(fullProfile, EmbeddedJCA.class.getClassLoader());
+   }
+
+   /**
+    * Constructs an embedded JCA environment. If <code>fullProfile</code>
+    * is <code>true</code> then a full JCA 1.6 container is initialized -
+    * otherwise only the basic kernel is initialized and services has
+    * to be added as deployments
+    * @param fullProfile Should a full profile be initialized
+    */
+   public EmbeddedJCA(boolean fullProfile, ClassLoader loader)
+   {
       this.fullProfile = fullProfile;
       this.shrinkwrapDeployments = null;
+      this.loader = loader;
    }
+
+
 
    /**
     * Startup
     * @exception Throwable If an error occurs
     */
    public void startup() throws Throwable
-   {
-      startup(EmbeddedJCA.class.getClassLoader());
-   }
-
-   /**
-    * Startup
-    * @exception Throwable If an error occurs
-    */
-   public void startup(ClassLoader loader) throws Throwable
    {
       List<String> order = new ArrayList<String>(3);
       order.add(".xml");
@@ -125,15 +133,6 @@ public class EmbeddedJCA
     * @exception Throwable If an error occurs
     */
    public void shutdown() throws Throwable
-   {
-      shutdown(EmbeddedJCA.class.getClassLoader());
-   }
-
-   /**
-    * Shutdown
-    * @exception Throwable If an error occurs
-    */
-   public void shutdown(ClassLoader loader) throws Throwable
    {
       if (shrinkwrapDeployments != null && shrinkwrapDeployments.size() > 0)
       {

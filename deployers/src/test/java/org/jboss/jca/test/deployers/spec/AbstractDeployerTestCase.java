@@ -63,15 +63,15 @@ public abstract class AbstractDeployerTestCase
             new File("embedded/src/main/resources").toURI().toURL(),
             new File("deployers/src/test/resources").toURI().toURL(),
             new File("validator/src/main/resources").toURI().toURL()}, currentClassLoader);
-      Validator.createDefaultResourceBundleWithCl(urlClassLoader);
+      Validator.createDefaultResourceBundleWithClassLoader(urlClassLoader);
       // Replace the thread classloader - assumes
       // you have permissions to do so
       Thread.currentThread().setContextClassLoader(urlClassLoader);
-      embedded = new EmbeddedJCA();
+      embedded = new EmbeddedJCA(true, urlClassLoader);
       //ClassLoader cl = embedded.getClass().getClassLoader();
 
       // Startup
-      embedded.startup(urlClassLoader);
+      embedded.startup();
    }
 
    /**
@@ -82,7 +82,7 @@ public abstract class AbstractDeployerTestCase
     * @return the shrinkwrapped rar
     * @throws Exception in case of error creating the archive
     */
-   protected ResourceAdapterArchive buidShrinkwrapRa(String archiveName, String packageName) throws Exception
+   protected ResourceAdapterArchive buildShrinkWrapResourceAdapter(String archiveName, String packageName) throws Exception
    {
       ResourceAdapterArchive raa = ShrinkWrap.create(ResourceAdapterArchive.class, archiveName);
 
@@ -102,7 +102,7 @@ public abstract class AbstractDeployerTestCase
    public static void afterClass() throws Throwable
    {
       // Shutdown embedded
-      embedded.shutdown(Thread.currentThread().getContextClassLoader());
+      embedded.shutdown();
 
       // Set embedded to null
       embedded = null;
@@ -119,7 +119,6 @@ public abstract class AbstractDeployerTestCase
    private static Class[] getClasses(String packageName) throws ClassNotFoundException, IOException
    {
       ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-      assert classLoader != null;
       String path = packageName.replace('.', '/');
       Enumeration<URL> resources = classLoader.getResources(path);
       List<File> dirs = new ArrayList<File>();
@@ -156,7 +155,6 @@ public abstract class AbstractDeployerTestCase
       {
          if (file.isDirectory())
          {
-            assert !file.getName().contains(".");
             classes.addAll(findClasses(file, packageName + "." + file.getName()));
          }
          else if (file.getName().endsWith(".class"))
